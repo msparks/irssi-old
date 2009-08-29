@@ -46,6 +46,7 @@ FORMAT_REC fecommon_irc_dcc_formats[] = {
 	{ "dcc_send_channel", "{dcc DCC SEND from {nick $0} [$1 port $2]: $3 [$4 bytes] requested in channel {channel $5}}", 6, { 0, 0, 1, 0, 0, 0 } },
 	{ "dcc_send_exists", "{dcc DCC already sending file {dccfile $0} for {nick $1}}", 2, { 0, 0 } },
 	{ "dcc_send_no_route", "{dcc DCC route lost to nick {nick $0} when trying to send file {dccfile $1}}", 2, { 0, 0 } },
+	{ "dcc_send_lookup_failed", "{dcc Warning: Failed to resolve dcc_own_ip hostname '$0'. Ignoring.}", 1, { 0 } },
 	{ "dcc_send_not_found", "{dcc DCC not sending file {dccfile $1} to {nick $0}}", 2, { 0, 0 } },
 	{ "dcc_send_file_open_error", "{dcc DCC can't open file {dccfile $0}: $1}", 2, { 0, 0 } },
 	{ "dcc_send_connected", "{dcc DCC sending file {dccfile $0} for {nick $1} [$2 port $3]}", 4, { 0, 0, 0, 1 } },
