@@ -158,13 +158,22 @@ DCC_REC *dcc_find_request(int type, const char *nick, const char *arg)
 
 void dcc_ip2str(IPADDR *ip, char *host)
 {
-	IPADDR temp_ip;
+	const char *own_ip_str;
+	IPADDR own_ip, own_ip6;
 	guint32 addr;
 
-	if (*settings_get_str("dcc_own_ip") != '\0') {
-                /* overridden IP address */
-		net_host2ip(settings_get_str("dcc_own_ip"), &temp_ip);
-                ip = &temp_ip;
+	own_ip_str = settings_get_str("dcc_own_ip");
+	if (strlen(own_ip_str)) {
+		/* overridden IP address */
+		if (net_gethostbyname(own_ip_str, &own_ip, &own_ip6) == 0) {
+			if (own_ip6.family)
+				ip = &own_ip6;
+			else if (own_ip.family)
+				ip = &own_ip;
+		} else {
+			/* Don't bother emitting a signal if we fail to look up the hostname.
+			   A signal was probably already emitted by dcc_listen. */
+		}
 	}
 
 	if (IPADDR_IS_V6(ip)) {
@@ -198,22 +207,17 @@ GIOChannel *dcc_listen(GIOChannel *iface, IPADDR *ip, int *port)
 {
         GIOChannel *handle;
 	IPADDR *listen_ip = NULL;
-	const char *dcc_port, *p, *own_ip;
+	IPADDR own_ip, own_ip6;
+	const char *dcc_port, *p, *own_ip_str;
 	int first, last;
 
 	if (net_getsockname(iface, ip, NULL) == -1)
 		return NULL;
 
-	/* figure out if we want to listen in IPv4 address or in "any" address,
-	   which may mean IPv4+IPv6 or just IPv6 depending on OS. */
-	own_ip = settings_get_str("dcc_own_ip");
-	if (*own_ip != '\0') {
-		if (is_ipv4_address(own_ip))
-			listen_ip = &ip4_any;
-	} else {
-		if (!IPADDR_IS_V6(ip))
-			listen_ip = &ip4_any;
-	}
+	own_ip_str = settings_get_str("dcc_own_ip");
+	if (strlen(own_ip_str) &&
+		  net_gethostbyname(own_ip_str, &own_ip, &own_ip6) != 0)
+		signal_emit("dcc error send lookup failed", 1, own_ip_str);
 
         /* get first port */
 	dcc_port = settings_get_str("dcc_port");

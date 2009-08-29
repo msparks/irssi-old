@@ -100,6 +100,14 @@ static void dcc_error_send_no_route(const char *nick, const char *fname)
 		    IRCTXT_DCC_SEND_NO_ROUTE, nick, fname);
 }
 
+static void dcc_error_send_lookup_failed(const char *hostname)
+{
+	g_return_if_fail(hostname != NULL);
+
+	printformat(NULL, NULL, MSGLEVEL_DCC,
+		    IRCTXT_DCC_SEND_LOOKUP_FAILED, hostname);
+}
+
 static void dcc_error_close_not_found(const char *type, const char *nick,
 				      const char *fname)
 {
@@ -112,6 +120,7 @@ static void dcc_error_close_not_found(const char *type, const char *nick,
 	printformat(NULL, NULL, MSGLEVEL_DCC,
 		    IRCTXT_DCC_SEND_NOT_FOUND, nick, fname);
 }
+
 
 static void sig_dcc_send_complete(GList **list, WINDOW_REC *window,
 				  const char *word, const char *line,
@@ -168,9 +177,10 @@ void fe_dcc_send_init(void)
 	signal_add("dcc error file open", (SIGNAL_FUNC) dcc_error_file_open);
 	signal_add("dcc error send exists", (SIGNAL_FUNC) dcc_error_send_exists);
 	signal_add("dcc error send no route", (SIGNAL_FUNC) dcc_error_send_no_route);
+	signal_add("dcc error send lookup failed", (SIGNAL_FUNC) dcc_error_send_lookup_failed);
 	signal_add("dcc error close not found", (SIGNAL_FUNC) dcc_error_close_not_found);
 	signal_add("complete command dcc send", (SIGNAL_FUNC) sig_dcc_send_complete);
-        signal_add("dcc list print", (SIGNAL_FUNC) sig_dcc_list_print);
+	signal_add("dcc list print", (SIGNAL_FUNC) sig_dcc_list_print);
 }
 
 void fe_dcc_send_deinit(void)
@@ -180,6 +190,7 @@ void fe_dcc_send_deinit(void)
 	signal_remove("dcc error file open", (SIGNAL_FUNC) dcc_error_file_open);
 	signal_remove("dcc error send exists", (SIGNAL_FUNC) dcc_error_send_exists);
 	signal_remove("dcc error send no route", (SIGNAL_FUNC) dcc_error_send_no_route);
+	signal_remove("dcc error send lookup failed", (SIGNAL_FUNC) dcc_error_send_lookup_failed);
 	signal_remove("dcc error close not found", (SIGNAL_FUNC) dcc_error_close_not_found);
 	signal_remove("complete command dcc send", (SIGNAL_FUNC) sig_dcc_send_complete);
         signal_remove("dcc list print", (SIGNAL_FUNC) sig_dcc_list_print);
