@@ -157,13 +157,13 @@ static void cmd_window_info(WINDOW_REC *win)
 
 static void cmd_window(const char *data, void *server, WI_ITEM_REC *item)
 {
-        while (*data == ' ') data++;
+	while (*data == ' ') data++;
 
 	if (*data == '\0')
-                cmd_window_info(active_win);
-	else if (is_numeric(data, 0))
-                signal_emit("command window refnum", 3, data, server, item);
-        else
+		cmd_window_info(active_win);
+	else if (is_numeric(data, ' '))
+		signal_emit("command window refnum", 3, data, server, item);
+	else
 		command_runsub("window", data, server, item);
 }
 
@@ -236,10 +236,10 @@ static void cmd_window_refnum(const char *data)
 {
 	WINDOW_REC *window;
 
-	if (!is_numeric(data, 0))
+	if (!is_numeric(data, ' '))
 		return;
 
-	window = window_find_refnum(atoi(data));
+	window = window_find_refnum(strtol(data, NULL, 10));
 	if (window != NULL)
 		window_set_active(window);
 }
@@ -324,7 +324,7 @@ static void cmd_window_goto(const char *data)
 
 	g_return_if_fail(data != NULL);
 
-	if (is_numeric(data, 0)) {
+	if (is_numeric(data, ' ')) {
 		cmd_window_refnum(data);
 		return;
 	}
@@ -333,7 +333,7 @@ static void cmd_window_goto(const char *data)
 		return;
 
 	if (g_ascii_strcasecmp(target, "active") == 0)
-                window = window_highest_activity(active_win);
+		window = window_highest_activity(active_win);
 	else {
 		window = window_find_name(target);
 		if (window == NULL && active_win->active_server != NULL)
