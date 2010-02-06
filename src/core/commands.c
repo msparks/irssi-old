@@ -597,7 +597,7 @@ static int get_cmd_options(char **data, int ignore_unknown,
 				option_find(optlist, option);
 
 			if (pos == -1 && optlist != NULL &&
-			    is_numeric(option, '\0')) {
+			    is_numeric(option)) {
 				/* check if we want -<number> option */
 				pos = option_find(optlist, "#");
 				if (pos != -1) {
@@ -637,7 +637,7 @@ static int get_cmd_options(char **data, int ignore_unknown,
 		if (option == NULL)
 			break;
 
-		if (*optlist[pos] == '@' && !is_numeric(*data, ' '))
+		if (*optlist[pos] == '@' && !is_numeric(*data))
 			break; /* expected a numeric argument */
 
 		/* save the argument */

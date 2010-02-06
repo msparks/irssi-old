@@ -687,7 +687,7 @@ static void cmd_window_size(const char *data)
         char sizestr[MAX_INT_STRLEN];
 	int size;
 
-	if (!is_numeric(data, 0)) return;
+	if (!is_numeric(data)) return;
 	size = atoi(data);
 
 	size -= WINDOW_MAIN(active_win)->height -
@@ -752,7 +752,7 @@ static void cmd_window_hide(const char *data)
 
 	if (*data == '\0')
 		window = active_win;
-	else if (is_numeric(data, 0)) {
+	else if (is_numeric(data)) {
 		window = window_find_refnum(atoi(data));
 		if (window == NULL) {
 			printformat_window(active_win, MSGLEVEL_CLIENTERROR,
@@ -787,7 +787,7 @@ static void cmd_window_show(const char *data)
 
 	if (*data == '\0') cmd_return_error(CMDERR_NOT_ENOUGH_PARAMS);
 
-	if (is_numeric(data, '\0')) {
+	if (is_numeric(data)) {
                 window = window_find_refnum(atoi(data));
 		if (window == NULL) {
 			printformat_window(active_win, MSGLEVEL_CLIENTERROR,
@@ -935,13 +935,13 @@ static void window_reparent(WINDOW_REC *win, MAIN_WINDOW_REC *mainwin)
 /* SYNTAX: WINDOW STICK [<ref#>] [ON|OFF] */
 static void cmd_window_stick(const char *data)
 {
-        MAIN_WINDOW_REC *mainwin;
-        WINDOW_REC *win;
+	MAIN_WINDOW_REC *mainwin;
+	WINDOW_REC *win;
 
-        mainwin = active_mainwin;
-        win = active_mainwin->active;
+	mainwin = active_mainwin;
+	win = active_mainwin->active;
 
-	if (is_numeric(data, ' ')) {
+	if (is_numeric(data)) {
 		/* ref# specified */
 		win = window_find_refnum(atoi(data));
 		if (win == NULL) {

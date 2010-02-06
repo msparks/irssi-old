@@ -102,7 +102,7 @@ static void cmd_log_open(const char *data)
 	if (g_hash_table_lookup(optlist, "window")) {
 		/* log by window ref# */
 		targetarg = g_hash_table_lookup(optlist, "targets");
-		if (targetarg == NULL || !is_numeric(targetarg, '\0')) {
+		if (targetarg == NULL || !is_numeric(targetarg)) {
 			ltoa(window, active_win->refnum);
 			targetarg = window;
 		}
@@ -141,7 +141,7 @@ static LOG_REC *log_find_from_data(const char *data)
 {
 	GSList *tmp;
 
-	if (!is_numeric(data, ' '))
+	if (!is_numeric(data))
 		return log_find(data);
 
 	/* with index number */

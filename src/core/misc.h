@@ -79,8 +79,13 @@ int parse_time_interval(const char *time, int *msecs);
 int parse_size(const char *size, int *bytes);
 
 /* Return TRUE if all characters in `str' are numbers.
-   Stop when `end_char' is found from string. */
-int is_numeric(const char *str, char end_char);
+   Stop when `end_char' is reached. Leading and trailing whitespace are
+   allowed. */
+int is_numeric_until(const char *str, char end_char);
+
+/* Return TRUE if all characters in `str' are numbers.
+   Stop when '\0' is reached. Leading and trailing whitespace are allowed. */
+int is_numeric(const char *str);
 
 /* Like strlcpy(), but return -1 if buffer was overflown, 0 if not. */
 int strocpy(char *dest, const char *src, size_t dstsize);

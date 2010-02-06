@@ -45,8 +45,8 @@ static FILE_DCC_REC *dcc_resume_find(int type, const char *nick, int port)
 }
 
 #define get_params_match_resume(params, pos) \
-	(is_numeric(params[pos], '\0') && atol(params[pos]) < 65536 && \
-	is_numeric(params[(pos)+1], '\0'))
+	(is_numeric(params[pos]) && atol(params[pos]) < 65536 && \
+	is_numeric(params[(pos)+1]))
 
 /* Based on get_file_params_count() found in dcc-get.c. The main difference
    is represented by the number of params expected after the filename (2 at
@@ -93,7 +93,7 @@ static int dcc_ctcp_resume_parse(int type, const char *data, const char *nick,
 		return 0;
 
 	fileparams = get_file_params_count_resume(params, paramcount);
-    
+
 	if (paramcount >= fileparams + 2) {
 		port = atoi(params[fileparams]);
 		*size = str_to_uofft(params[fileparams+1]);

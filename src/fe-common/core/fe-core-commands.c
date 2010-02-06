@@ -86,7 +86,7 @@ static void cmd_echo(const char *data, void *server, WI_ITEM_REC *item)
 
 	winname = g_hash_table_lookup(optlist, "window");
 	window = winname == NULL ? NULL :
-		is_numeric(winname, '\0') ?
+		is_numeric(winname) ?
 		window_find_refnum(atoi(winname)) :
 		window_find_item(NULL, winname);
 	if (window == NULL) window = active_win;

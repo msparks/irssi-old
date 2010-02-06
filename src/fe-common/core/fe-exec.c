@@ -153,7 +153,7 @@ static PROCESS_REC *process_find(const char *name, int verbose)
 
         g_return_val_if_fail(name != NULL, NULL);
 
-	if (*name == '%' && is_numeric(name+1, 0))
+	if (*name == '%' && is_numeric(name+1))
                 return process_find_id(atoi(name+1), verbose);
 
 	for (tmp = processes; tmp != NULL; tmp = tmp->next) {
@@ -253,7 +253,7 @@ static int cmd_options_get_signal(const char *cmd,
 	signame = list->data;
 	signum = -1;
 
-	signum = is_numeric(signame, 0) ? atol(signame) :
+	signum = is_numeric(signame) ? strtol(signame, NULL, 10) :
 		signal_name_to_id(signame);
 
 	if (signum == -1 || list->next != NULL) {
