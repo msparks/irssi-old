@@ -273,7 +273,7 @@ static void cmd_scrollback_goto(const char *data)
 		/* go forward/backward n lines */
                 lines = atoi(datearg + (*datearg == '-' ? 0 : 1));
 		gui_window_scroll(active_win, lines);
-	} else if (*timearg == '\0' && is_numeric(datearg, '\0')) {
+	} else if (*timearg == '\0' && is_numeric(datearg)) {
 		/* go to n'th line. */
 		scrollback_goto_line(atoi(datearg));
 	} else {

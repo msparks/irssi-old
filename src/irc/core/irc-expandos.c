@@ -39,7 +39,7 @@ static char *expando_lastjoin(SERVER_REC *server, void *item, int *free_ret)
 static char *expando_server_numeric(SERVER_REC *server, void *item, int *free_ret)
 {
 	return current_server_event == NULL ||
-		!is_numeric(current_server_event, 0) ? NULL :
+		!is_numeric(current_server_event) ? NULL :
 		current_server_event;
 }
 

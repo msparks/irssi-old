@@ -350,9 +350,9 @@ void dcc_get_passive(GET_DCC_REC *dcc)
 }
 
 #define get_params_match(params, pos) \
-	((is_numeric(params[pos], '\0') || is_ipv6_address(params[pos])) && \
-	is_numeric(params[(pos)+1], '\0') && atol(params[(pos)+1]) < 65536 && \
-	is_numeric(params[(pos)+2], '\0'))
+	((is_numeric(params[pos]) || is_ipv6_address(params[pos])) && \
+	is_numeric(params[(pos)+1]) && atol(params[(pos)+1]) < 65536 && \
+	is_numeric(params[(pos)+2]))
 
 /* Return number of parameters in `params' that belong to file name.
    Normally it's paramcount-3, but I don't think anything forbids of
@@ -451,7 +451,7 @@ static void ctcp_msg_dcc_send(IRC_SERVER_REC *server, const char *data,
 		g_memmove(fname, fname+1, len);
                 quoted = TRUE;
 	}
-    
+
 	if (passive && port != 0) {
 		/* This is NOT a DCC SEND request! This is a reply to our
 		   passive request. We MUST check the IDs and then connect to
@@ -498,7 +498,7 @@ static void ctcp_msg_dcc_send(IRC_SERVER_REC *server, const char *data,
 
 	if (passive && port == 0)
 		dcc->pasv_id = p_id; /* Assign the ID to the DCC */
-    
+
 	memcpy(&dcc->addr, &ip, sizeof(ip));
 	if (dcc->addr.family == AF_INET)
 		net_ip2host(&dcc->addr, dcc->addrstr);

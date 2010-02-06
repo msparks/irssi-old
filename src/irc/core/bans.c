@@ -155,7 +155,7 @@ void ban_remove(IRC_CHANNEL_REC *channel, const char *bans)
 				rec = g_slist_nth_data(channel->banlist,
 							g_slist_length(channel->banlist) - 1);
 			}
-			else if (is_numeric(*ban, '\0')) {
+			else if (is_numeric(*ban)) {
 				/* unbanning with ban# */
 				rec = g_slist_nth_data(channel->banlist,
 							atoi(*ban)-1);
@@ -309,7 +309,7 @@ static void cmd_unban(const char *data, IRC_SERVER_REC *server, void *item)
 		ban = g_strdup(BAN_LAST);
 
 	command_set_ban(ban ? ban : data, server, item, FALSE, 0);
-	
+
 	g_free(ban);
 
 	cmd_params_free(free_arg);

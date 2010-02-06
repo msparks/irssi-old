@@ -63,7 +63,7 @@ static void ignore_print(int index, IGNORE_REC *rec)
 	}
 	if (rec->fullword) g_string_append(options, "-full ");
 	if (rec->replies) g_string_append(options, "-replies ");
-	if (rec->servertag != NULL) 
+	if (rec->servertag != NULL)
 		g_string_append_printf(options, "-network %s ", rec->servertag);
 	if (rec->pattern != NULL)
 		g_string_append_printf(options, "-pattern %s ", rec->pattern);
@@ -135,7 +135,7 @@ static void cmd_ignore(const char *data)
 	/* Allow -ircnet for backwards compatibility */
 	if (!servertag)
 		servertag = g_hash_table_lookup(optlist, "ircnet");
-	
+
 	if (*mask == '\0') cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
         if (*levels == '\0') levels = "ALL";
 
@@ -213,7 +213,7 @@ static void cmd_unignore(const char *data)
 	if (*mask == '\0')
                 cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
 
-	if (is_numeric(mask, ' ')) {
+	if (is_numeric(mask)) {
 		/* with index number */
 		tmp = g_slist_nth(ignores, atoi(mask)-1);
 		rec = tmp == NULL ? NULL : tmp->data;

@@ -98,7 +98,7 @@ static void show_lastlog(const char *searchtext, GHashTable *optlist,
         window = active_win;
         str = g_hash_table_lookup(optlist, "window");
 	if (str != NULL) {
-		window = is_numeric(str, '\0') ?
+		window = is_numeric(str) ?
 			window_find_refnum(atoi(str)) :
 			window_find_item(NULL, str);
 		if (window == NULL) {
@@ -241,8 +241,8 @@ static void cmd_lastlog(const char *data)
 			    &text, &countstr, &start))
 		return;
 
-	if (*start == '\0' && is_numeric(text, 0) && *text != '0' &&
-	    (*countstr == '\0' || is_numeric(countstr, 0))) {
+	if (*start == '\0' && is_numeric(text) && *text != '0' &&
+	    (*countstr == '\0' || is_numeric(countstr))) {
 		start = countstr;
 		countstr = text;
 		text = "";

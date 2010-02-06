@@ -162,7 +162,7 @@ static void cmd_window(const char *data, void *server, WI_ITEM_REC *item)
 
 	if (*data == '\0')
 		cmd_window_info(active_win);
-	else if (is_numeric(data, ' '))
+	else if (is_numeric_until(data, ' '))
 		signal_emit("command window refnum", 3, data, server, item);
 	else
 		command_runsub("window", data, server, item);
@@ -195,8 +195,8 @@ static void cmd_window_close(const char *data)
 	if (!cmd_get_params(data, &free_arg, 2, &first, &last))
 		return;
 
-	if ((*first != '\0' && !is_numeric(first, '\0')) ||
-	    ((*last != '\0') && !is_numeric(last, '\0'))) {
+	if ((*first != '\0' && !is_numeric(first)) ||
+	    ((*last != '\0') && !is_numeric(last))) {
 		cmd_params_free(free_arg);
                 return;
 	}
@@ -237,7 +237,7 @@ static void cmd_window_refnum(const char *data)
 {
 	WINDOW_REC *window;
 
-	if (!is_numeric(data, ' '))
+	if (!is_numeric(data))
 		return;
 
 	window = window_find_refnum(strtol(data, NULL, 10));
@@ -344,7 +344,7 @@ static void cmd_window_goto(const char *data)
 
 	g_return_if_fail(data != NULL);
 
-	if (is_numeric(data, ' ')) {
+	if (is_numeric(data)) {
 		cmd_window_refnum(data);
 		return;
 	}
@@ -352,12 +352,10 @@ static void cmd_window_goto(const char *data)
 	if (!cmd_get_params(data, &free_arg, 1, &target))
 		return;
 
-	if (g_ascii_strcasecmp(target, "active") == 0) {
-		if (settings_get_bool("active_window_ignore_refnum") == TRUE)
-			window = window_highest_activity(active_win, 1);
-		else
-			window = window_highest_activity(active_win, 0);
-	} else {
+	if (g_ascii_strcasecmp(target, "active") == 0)
+		window = window_highest_activity(active_win,
+			settings_get_bool("active_window_ignore_refnum"));
+	else {
 		window = window_find_name(target);
 		if (window == NULL && active_win->active_server != NULL)
 			window = window_find_item_cycle(active_win->active_server, target);
@@ -504,9 +502,9 @@ static void cmd_window_server(const char *data)
 
 static void cmd_window_item(const char *data, void *server, WI_ITEM_REC *item)
 {
-        while (*data == ' ') data++;
+	while (*data == ' ') data++;
 
-	if (is_numeric(data, '\0'))
+	if (is_numeric(data))
 		signal_emit("command window item goto", 3, data, server, item);
 	else
 		command_runsub("window item", data, server, item);
@@ -531,11 +529,11 @@ static void cmd_window_item_goto(const char *data, SERVER_REC *server)
 	GSList *tmp;
 	void *free_arg;
 	char *target;
-	
+
 	if (!cmd_get_params(data, &free_arg, 1, &target))
 		return;
 
-	if (is_numeric(target, '\0')) {
+	if (is_numeric(target)) {
 		/* change to specified number */
 		tmp = g_slist_nth(active_win->items, atoi(target)-1);
 		item = tmp == NULL ? NULL : tmp->data;
@@ -560,15 +558,16 @@ static void cmd_window_item_move(const char *data, SERVER_REC *server,
 	if (!cmd_get_params(data, &free_arg, 1, &target))
 		return;
 
-        if (is_numeric(target, '\0')) {
-                /* move current window item to specified window */
-                window = window_find_refnum(atoi(target));
-        } else {
-                /* move specified window item to current window */
-                item = window_item_find(server, target);
-                window = active_win;
-        }
-        if (window != NULL && item != NULL)
+	if (is_numeric(target)) {
+		/* move current window item to specified window */
+		window = window_find_refnum(atoi(target));
+	} else {
+		/* move specified window item to current window */
+		item = window_item_find(server, target);
+		window = active_win;
+	}
+
+	if (window != NULL && item != NULL)
 		window_item_set_active(window, item);
 
 	cmd_params_free(free_arg);
@@ -741,9 +740,9 @@ static void cmd_window_move_last(void)
 /* SYNTAX: WINDOW MOVE <number>|<direction> */
 static void cmd_window_move(const char *data, SERVER_REC *server, WI_ITEM_REC *item)
 {
-	if (!is_numeric(data, 0)) {
+	if (!is_numeric(data)) {
 		command_runsub("window move", data, server, item);
-                return;
+		return;
 	}
 
 	active_window_move_to(atoi(data));

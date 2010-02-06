@@ -515,20 +515,37 @@ int match_wildcards(const char *cmask, const char *data)
 }
 
 /* Return TRUE if all characters in `str' are numbers.
-   Stop when `end_char' is found from string. */
-int is_numeric(const char *str, char end_char)
+   Stop when `end_char' is reached. Leading and trailing whitespace are
+   allowed. */
+int is_numeric_until(const char *str, char end_char)
 {
 	g_return_val_if_fail(str != NULL, FALSE);
+
+	/* allow leading whitespace */
+	while (i_isspace(*str)) str++;
 
 	if (*str == '\0' || *str == end_char)
 		return FALSE;
 
 	while (*str != '\0' && *str != end_char) {
+		/* allow trailing whitespace */
+		if (i_isspace(*str)) {
+			while (i_isspace(*str)) str++;
+			return (*str == '\0' || *str == end_char) ? TRUE : FALSE;
+		}
+
 		if (!i_isdigit(*str)) return FALSE;
 		str++;
 	}
 
 	return TRUE;
+}
+
+/* Return TRUE if all characters in `str' are numbers.
+   Stop when '\0' is reached. Leading and trailing whitespace are allowed. */
+int is_numeric(const char *str)
+{
+	return is_numeric_until(str, '\0');
 }
 
 /* replace all `from' chars in string to `to' chars. returns `str' */
