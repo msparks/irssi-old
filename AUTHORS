@@ -10,6 +10,7 @@ Irssi staff (current maintainers) <staff@irssi.org>:
   Geert Hauwaerts (Geert)
   Jilles Tjoelker (jilles)
   Alexander Færøy (ahf)
+  Jase Thew (bazerka)
 
 Former developers:
 
@@ -74,3 +75,5 @@ Other patches (grep for "patch" in ChangeLog) by:
   Johan Kiviniemi
   JasonX
   Lukas Mai
+  Ismael Luceno
+  Thomas Karpiniec

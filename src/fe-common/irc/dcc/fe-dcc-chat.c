@@ -23,6 +23,7 @@
 #include "commands.h"
 #include "levels.h"
 #include "settings.h"
+#include "misc.h"
 
 #include "irc.h"
 #include "irc-servers.h"
@@ -330,7 +331,7 @@ static void cmd_ctcp(const char *data, SERVER_REC *server)
 		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
 			    IRCTXT_DCC_CHAT_NOT_FOUND, target+1);
 	} else {
-		g_strup(ctcpcmd);
+		ascii_strup(ctcpcmd);
 		signal_emit("message dcc own_ctcp", 3, dcc, ctcpcmd, ctcpdata);
 	}
 

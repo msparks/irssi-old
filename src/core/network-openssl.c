@@ -97,28 +97,28 @@ static char *tls_text_name(X509_NAME *name, int nid)
 
 	if (name == 0 || (pos = X509_NAME_get_index_by_NID(name, nid, -1)) < 0) {
 		return NULL;
-    }
+	}
 
-    entry = X509_NAME_get_entry(name, pos);
-    g_return_val_if_fail(entry != NULL, NULL);
-    entry_str = X509_NAME_ENTRY_get_data(entry);
-    g_return_val_if_fail(entry_str != NULL, NULL);
+	entry = X509_NAME_get_entry(name, pos);
+	g_return_val_if_fail(entry != NULL, NULL);
+	entry_str = X509_NAME_ENTRY_get_data(entry);
+	g_return_val_if_fail(entry_str != NULL, NULL);
 
-    /* Convert everything into UTF-8. It's up to OpenSSL to do something
+	/* Convert everything into UTF-8. It's up to OpenSSL to do something
 	   reasonable when converting ASCII formats that contain non-ASCII
 	   content. */
-    if ((utf8_length = ASN1_STRING_to_UTF8(&utf8_value, entry_str)) < 0) {
-    	g_warning("Error decoding ASN.1 type=%d", ASN1_STRING_type(entry_str));
-    	return NULL;
-    }
+	if ((utf8_length = ASN1_STRING_to_UTF8(&utf8_value, entry_str)) < 0) {
+		g_warning("Error decoding ASN.1 type=%d", ASN1_STRING_type(entry_str));
+		return NULL;
+	}
 
-    if (has_internal_nul((char *)utf8_value, utf8_length)) {
-    	g_warning("NUL character in hostname in certificate");
-    	OPENSSL_free(utf8_value);
-    	return NULL;
-    }
+	if (has_internal_nul((char *)utf8_value, utf8_length)) {
+		g_warning("NUL character in hostname in certificate");
+		OPENSSL_free(utf8_value);
+		return NULL;
+	}
 
-    result = g_strdup((char *) utf8_value);
+	result = g_strdup((char *) utf8_value);
 	OPENSSL_free(utf8_value);
 	return result;
 }
@@ -168,10 +168,10 @@ static gboolean irssi_ssl_verify_hostname(X509 *cert, const char *hostname)
 			if (cert_dns_name && *cert_dns_name) {
 				matched = match_hostname(cert_dns_name, hostname);
 			}
-    	}
+		}
 
-	    /* Free stack *and* member GENERAL_NAME objects */
-	    sk_GENERAL_NAME_pop_free(gens, GENERAL_NAME_free);
+		/* Free stack *and* member GENERAL_NAME objects */
+		sk_GENERAL_NAME_pop_free(gens, GENERAL_NAME_free);
 	}
 
 	if (has_dns_name) {
@@ -182,15 +182,15 @@ static gboolean irssi_ssl_verify_hostname(X509 *cert, const char *hostname)
 		return matched;
 	} else { /* No subjectAltNames, look at CommonName */
 		cert_subject_cn = tls_text_name(X509_get_subject_name(cert), NID_commonName);
-	    if (cert_subject_cn && *cert_subject_cn) {
-	    	matched = match_hostname(cert_subject_cn, hostname);
-	    	if (! matched) {
+		if (cert_subject_cn && *cert_subject_cn) {
+			matched = match_hostname(cert_subject_cn, hostname);
+			if (! matched) {
 				g_warning("SSL certificate common name '%s' doesn't match host name '%s'", cert_subject_cn, hostname);
-	    	}
-	    } else {
-	    	g_warning("No subjectAltNames and no valid common name in certificate");
-	    }
-	    free(cert_subject_cn);
+			}
+		} else {
+			g_warning("No subjectAltNames and no valid common name in certificate");
+		}
+		free(cert_subject_cn);
 	}
 
 	return matched;
@@ -198,12 +198,16 @@ static gboolean irssi_ssl_verify_hostname(X509 *cert, const char *hostname)
 
 static gboolean irssi_ssl_verify(SSL *ssl, SSL_CTX *ctx, const char* hostname, X509 *cert)
 {
-	if (SSL_get_verify_result(ssl) != X509_V_OK) {
+	long result;
+
+	result = SSL_get_verify_result(ssl);
+	if (result != X509_V_OK) {
 		unsigned char md[EVP_MAX_MD_SIZE];
 		unsigned int n;
 		char *str;
 
-		g_warning("Could not verify SSL servers certificate:");
+		g_warning("Could not verify SSL servers certificate: %s",
+				X509_verify_cert_error_string(result));
 		if ((str = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0)) == NULL)
 			g_warning("  Could not get subject-name from peer certificate");
 		else {
@@ -243,6 +247,7 @@ static GIOStatus irssi_ssl_read(GIOChannel *handle, gchar *buf, gsize len, gsize
 	GIOSSLChannel *chan = (GIOSSLChannel *)handle;
 	gint ret1, err;
 	const char *errstr;
+	gchar *errmsg;
 
 	ret1 = SSL_read(chan->ssl, buf, len);
 	if(ret1 <= 0)
@@ -267,9 +272,10 @@ static GIOStatus irssi_ssl_read(GIOChannel *handle, gchar *buf, gsize len, gsize
 			if (errstr == NULL)
 				errstr = "unknown SSL error";
 		}
-		g_warning("SSL read error: %s", errstr);
+		errmsg = g_strdup_printf("SSL read error: %s", errstr);
 		*gerr = g_error_new_literal(G_IO_CHANNEL_ERROR, G_IO_CHANNEL_ERROR_FAILED,
-					    errstr);
+					    errmsg);
+		g_free(errmsg);
 		return G_IO_STATUS_ERROR;
 	}
 	else
@@ -286,6 +292,7 @@ static GIOStatus irssi_ssl_write(GIOChannel *handle, const gchar *buf, gsize len
 	GIOSSLChannel *chan = (GIOSSLChannel *)handle;
 	gint ret1, err;
 	const char *errstr;
+	gchar *errmsg;
 
 	ret1 = SSL_write(chan->ssl, (const char *)buf, len);
 	if(ret1 <= 0)
@@ -310,9 +317,10 @@ static GIOStatus irssi_ssl_write(GIOChannel *handle, const gchar *buf, gsize len
 			if (errstr == NULL)
 				errstr = "unknown SSL error";
 		}
-		g_warning("SSL write error: %s", errstr);
+		errmsg = g_strdup_printf("SSL write error: %s", errstr);
 		*gerr = g_error_new_literal(G_IO_CHANNEL_ERROR, G_IO_CHANNEL_ERROR_FAILED,
-					    errstr);
+					    errmsg);
+		g_free(errmsg);
 		return G_IO_STATUS_ERROR;
 	}
 	else
@@ -402,6 +410,7 @@ static GIOChannel *irssi_ssl_get_iochannel(GIOChannel *handle, const char *hostn
 		g_error("Could not allocate memory for SSL context");
 		return NULL;
 	}
+	SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2);
 
 	if (mycert && *mycert) {
 		char *scert = NULL, *spkey = NULL;
@@ -531,7 +540,7 @@ int irssi_ssl_handshake(GIOChannel *handle)
 
 #else /* HAVE_OPENSSL */
 
-GIOChannel *net_connect_ip_ssl(IPADDR *ip, int port, IPADDR *my_ip, const char *cert, const char *pkey, const char *cafile, const char *capath, gboolean verify)
+GIOChannel *net_connect_ip_ssl(IPADDR *ip, int port, const char* hostname, IPADDR *my_ip, const char *cert, const char *pkey, const char *cafile, const char *capath, gboolean verify)
 {
 	g_warning("Connection failed: SSL support not enabled in this build.");
 	errno = ENOSYS;
