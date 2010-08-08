@@ -60,7 +60,8 @@ static void irc_server_event(IRC_SERVER_REC *server, const char *line)
 	   indicate that the join failed. */
 	params = event_get_params(line, 3, &numeric, NULL, &channel);
 
-	if (numeric[0] == '4')
+	/* 520 is ERR_CANTJOINOPERSONLY (InspIRCd) */
+	if (numeric[0] == '4' || strncmp(numeric, "520", 3) == 0)
 		check_join_failure(server, channel);
 
 	g_free(params);
@@ -123,10 +124,10 @@ static void channel_change_topic(IRC_SERVER_REC *server, const char *channel,
 {
 	CHANNEL_REC *chanrec;
 	char *recoded = NULL;
-	
+
 	chanrec = channel_find(SERVER(server), channel);
 	if (chanrec == NULL) return;
-	/* the topic may be send out encoded, so we need to 
+	/* the topic may be send out encoded, so we need to
 	   recode it back or /topic <tab> will not work properly */
 	recoded = recode_in(SERVER(server), topic, channel);
 	if (topic != NULL) {
@@ -137,7 +138,7 @@ static void channel_change_topic(IRC_SERVER_REC *server, const char *channel,
 
 	g_free_not_null(chanrec->topic_by);
 	chanrec->topic_by = g_strdup(setby);
-	
+
 	chanrec->topic_time = settime;
 
 	signal_emit("channel topic changed", 1, chanrec);
